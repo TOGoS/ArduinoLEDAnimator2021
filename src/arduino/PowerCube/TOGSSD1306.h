@@ -85,8 +85,8 @@ class TOGSSD1306 {
     void setPageMode();
     void setHorizontalMode();
 
-    void setTextXY(unsigned char Row, unsigned char Column);
-    void setOctetXY(unsigned char Row, unsigned char Column);
+    void gotoCharRowCol(unsigned char Row, unsigned char Column);
+    void gotoRowCol(unsigned char Row, unsigned char Column);
     void clearDisplay();
     void setBrightness(unsigned char Brightness);
     bool putChar(unsigned char c);
@@ -112,7 +112,7 @@ class TOGSSD1306 {
     uint8_t m_font_offset = 2;  // Font bytes for meta data.
     uint8_t m_font_width;       // Font witdth.
     uint8_t m_col;              // Cursor column.
-    uint8_t m_row;              // Cursor row (RAM). 
+    uint8_t m_row;              // Cursor row (RAM).
 };
 
 extern TOGSSD1306 oled;  // TOGSSD1306 object 

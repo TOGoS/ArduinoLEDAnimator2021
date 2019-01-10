@@ -89,18 +89,16 @@ void TOGSSD1306::setPageMode()
     sendCommand(0x02);                      //set page addressing mode
 }
 
-void TOGSSD1306::setOctetXY(unsigned char row, unsigned char col)
+void TOGSSD1306::gotoRowCol(unsigned char row, unsigned char col)
 {
-    sendCommand(0xB0 + row);                          //set page address
-    sendCommand(0x00 + (col & 0x0F));    //set column lower addr
-    sendCommand(0x10 + ((col>>4)&0x0F)); //set column higher addr
+  sendCommand(0xB0 + row);                          //set page address
+  sendCommand(0x00 + (col & 0x0F));    //set column lower addr
+  sendCommand(0x10 + ((col>>4)&0x0F)); //set column higher addr
 }
 
-void TOGSSD1306::setTextXY(unsigned char row, unsigned char col)
+void TOGSSD1306::gotoCharRowCol(unsigned char row, unsigned char col)
 {
-    sendCommand(0xB0 + row);                          //set page address
-    sendCommand(0x00 + (m_font_width*col & 0x0F));    //set column lower addr
-    sendCommand(0x10 + ((m_font_width*col>>4)&0x0F)); //set column higher addr
+  gotoRowCol(row, col*m_font_width);
 }
 
 void TOGSSD1306::clearDisplay()
@@ -109,7 +107,7 @@ void TOGSSD1306::clearDisplay()
   sendCommand(SSD1306_Display_Off_Cmd);     //display off
   for(j=0;j<8;j++)
   {    
-    setTextXY(j,0);    
+    gotoCharRowCol(j,0);    
     {
       for(i=0;i<16;i++)  //clear all columns
       {
@@ -118,7 +116,7 @@ void TOGSSD1306::clearDisplay()
     }
   }
   sendCommand(SSD1306_Display_On_Cmd);     //display on
-  setTextXY(0,0);    
+  gotoCharRowCol(0,0);    
 }
 
 void TOGSSD1306::sendData(unsigned char Data)

@@ -5,8 +5,10 @@
 The goal of this project is to create a framework for ESP8266-controlled
 battery and light controllers.
 
+If you want to basically throw all similar Arduino/ESP8266 projects in here
+so they can share code more easily or whatever, that would probably be fine.
 
-Sofware features:
+*** Desired sofware features
 
 - WiFi repeater
   - Look into 
@@ -17,7 +19,7 @@ Sofware features:
 - Play around with https://github.com/martin-ger/esp_wifi_repeater for inspiration
 - Look into using ENC28J60 for connecting to ethernet
 
-Hardware features:
+*** Desired hardware features
 
 - 3 power inputs that can be independently voltage-sampled and connected to Vbatt
   - 12V power supply
@@ -25,3 +27,4 @@ Hardware features:
   - 12V internal battery
   - 9V internal backup battery
 - A ~12V output port
+- OLED screen for showing status

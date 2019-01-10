@@ -1,0 +1,27 @@
+#+TITLE: PowerCube
+
+[2019-01-09]
+
+The goal of this project is to create a framework for ESP8266-controlled
+battery and light controllers.
+
+
+Sofware features:
+
+- WiFi repeater
+  - Look into 
+- Reporting via MQTT
+- Display via I2C OLED screen
+- Dynamic configuration over WiFi
+
+- Play around with https://github.com/martin-ger/esp_wifi_repeater for inspiration
+- Look into using ENC28J60 for connecting to ethernet
+
+Hardware features:
+
+- 3 power inputs that can be independently voltage-sampled and connected to Vbatt
+  - 12V power supply
+  - 12V external battery
+  - 12V internal battery
+  - 9V internal backup battery
+- A ~12V output port

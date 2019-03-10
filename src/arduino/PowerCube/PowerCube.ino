@@ -4,38 +4,40 @@
 
 // Data sheet for the SSD1306: https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
-class TOGoS_SSD1306Controller {
-  TwoWire &twi;
-  uint8_t address;
- public:
-  TOGoS_SSD1306Controller(TwoWire &twi, uint8_t address) : twi(twi), address(address) { }
-  void initialize();
-  void sendCommand(uint8_t command);
-  void sendData(uint8_t data);
+namespace TOGoS { namespace SSD1306 {
+  class Controller {
+    TwoWire &twi;
+    uint8_t address;
+  public:
+    Controller(TwoWire &twi, uint8_t address) : twi(twi), address(address) { }
+    void initialize();
+    void sendCommand(uint8_t command);
+    void sendData(uint8_t data);
+    
+    void displayOn();
+    void clear(uint8_t data=0x00);
+    void clearToEndOfRow();
+    void setBrightness(uint8_t brightness);
+    void gotoRowCol(uint8_t row, uint8_t col);
+    
+    uint8_t atRow = 0, atColumn = 0;
+    
+    static const uint8_t rowCount = 8;
+    static const uint8_t columnCount = 128;
+    
+    static const uint8_t SSD1306_Command_Mode         = 0x80;
+    static const uint8_t SSD1306_Data_Mode            = 0x40;
+    static const uint8_t SSD1306_Display_Off_Cmd      = 0xAE;
+    static const uint8_t SSD1306_Display_On_Cmd       = 0xAF;
+    static const uint8_t SSD1306_Normal_Display_Cmd   = 0xA6;
+    static const uint8_t SSD1306_Inverse_Display_Cmd  = 0xA7;
+    static const uint8_t SSD1306_Activate_Scroll_Cmd  = 0x2F;
+    static const uint8_t SSD1306_Dectivate_Scroll_Cmd = 0x2E;
+    static const uint8_t SSD1306_Set_Brightness_Cmd   = 0x81;
+  };
+}}
 
-  void displayOn();
-  void clear(uint8_t data=0x00);
-  void clearToEndOfRow();
-  void setBrightness(uint8_t brightness);
-  void gotoRowCol(uint8_t row, uint8_t col);
-
-  uint8_t atRow = 0, atColumn = 0;
-
-  static const uint8_t rowCount = 8;
-  static const uint8_t columnCount = 128;
-  
-  static const uint8_t SSD1306_Command_Mode         = 0x80;
-  static const uint8_t SSD1306_Data_Mode            = 0x40;
-  static const uint8_t SSD1306_Display_Off_Cmd      = 0xAE;
-  static const uint8_t SSD1306_Display_On_Cmd       = 0xAF;
-  static const uint8_t SSD1306_Normal_Display_Cmd   = 0xA6;
-  static const uint8_t SSD1306_Inverse_Display_Cmd  = 0xA7;
-  static const uint8_t SSD1306_Activate_Scroll_Cmd  = 0x2F;
-  static const uint8_t SSD1306_Dectivate_Scroll_Cmd = 0x2E;
-  static const uint8_t SSD1306_Set_Brightness_Cmd   = 0x81;
-};
-
-void TOGoS_SSD1306Controller::initialize() {
+void TOGoS::SSD1306::Controller::initialize() {
   sendCommand(0xAE);            //display off
   sendCommand(0xA6);            //Set Normal Display (default)
   sendCommand(0xAE);            //DISPLAYOFF
@@ -67,14 +69,14 @@ void TOGoS_SSD1306Controller::initialize() {
   sendCommand(0x00);            //Set Memory Addressing Mode ab Horizontal addressing mode
 }
 
-void TOGoS_SSD1306Controller::sendCommand(uint8_t command) {
+void TOGoS::SSD1306::Controller::sendCommand(uint8_t command) {
   this->twi.beginTransmission(this->address);    // begin I2C communication
   this->twi.write(SSD1306_Command_Mode);   // Set OLED Command mode
   this->twi.write(command);
   this->twi.endTransmission();             // End I2C communication
 }
 
-void TOGoS_SSD1306Controller::sendData(uint8_t data) {
+void TOGoS::SSD1306::Controller::sendData(uint8_t data) {
   this->twi.beginTransmission(this->address); // begin I2C transmission
   this->twi.write(SSD1306_Data_Mode);            // data mode
   this->twi.write(data);
@@ -89,16 +91,16 @@ void TOGoS_SSD1306Controller::sendData(uint8_t data) {
   }
 }
 
-void TOGoS_SSD1306Controller::displayOn() {
+void TOGoS::SSD1306::Controller::displayOn() {
   this->sendCommand(SSD1306_Display_On_Cmd);     //display on
 }
 
-void TOGoS_SSD1306Controller::setBrightness(uint8_t brightness) {
+void TOGoS::SSD1306::Controller::setBrightness(uint8_t brightness) {
    sendCommand(SSD1306_Set_Brightness_Cmd);
    sendCommand(brightness);
 }
 
-void TOGoS_SSD1306Controller::gotoRowCol(uint8_t row, uint8_t col) {
+void TOGoS::SSD1306::Controller::gotoRowCol(uint8_t row, uint8_t col) {
   this->sendCommand(0xB0 + row);                          //set page address
   this->sendCommand(0x00 + (col & 0x0F));    //set column lower addr
   this->sendCommand(0x10 + ((col>>4)&0x0F)); //set column higher addr
@@ -106,48 +108,49 @@ void TOGoS_SSD1306Controller::gotoRowCol(uint8_t row, uint8_t col) {
   this->atRow = row;
 }
 
-void TOGoS_SSD1306Controller::clear(uint8_t data) {
+void TOGoS::SSD1306::Controller::clear(uint8_t data) {
   this->gotoRowCol(0,0);
   do {
     this->sendData(data);
   } while( this->atColumn != 0 || this->atRow != 0 );
 }
 
-void TOGoS_SSD1306Controller::clearToEndOfRow() {
+void TOGoS::SSD1306::Controller::clearToEndOfRow() {
   do {
     this->sendData(0x00);
   } while( this->atColumn != 0 );
 }
 
-
-class TOGoS_SSD1306Printer : public Print {
-  TOGoS_SSD1306Controller &controller;
-  const uint8_t* font;
-public:
-  TOGoS_SSD1306Printer(TOGoS_SSD1306Controller& controller,const uint8_t* font) : controller(controller), font(font) {}
-  virtual size_t write(uint8_t ch) override {
-    int fontWidth = pgm_read_byte(&font[0]);
-    int fontOffset = 2; // font 'header' size
-    if(ch == '\r') {
+namespace TOGoS { namespace SSD1306 {
+  class Printer : public Print {
+    TOGoS::SSD1306::Controller &controller;
+    const uint8_t* font;
+  public:
+    Printer(TOGoS::SSD1306::Controller& controller,const uint8_t* font) : controller(controller), font(font) {}
+    virtual size_t write(uint8_t ch) override {
+      int fontWidth = pgm_read_byte(&font[0]);
+      int fontOffset = 2; // font 'header' size
+      if(ch == '\r') {
+        return 1;
+      }
+      if(ch == '\n') {
+        this->controller.clearToEndOfRow();
+        return 1;
+      }
+      if(ch < 32 || ch > 127) {
+        ch = ' ';
+      }
+      for(uint8_t i=0; i<fontWidth; i++) {
+        // Font array starts at 0, ASCII starts at 32
+        this->controller.sendData(pgm_read_byte(&this->font[(ch-32)*fontWidth+fontOffset+i])); 
+      }
       return 1;
     }
-    if(ch == '\n') {
-      this->controller.clearToEndOfRow();
-      return 1;
+    virtual int availableForWrite() const {
+      return true;
     }
-    if(ch < 32 || ch > 127) {
-      ch = ' ';
-    }
-    for(uint8_t i=0; i<fontWidth; i++) {
-     // Font array starts at 0, ASCII starts at 32
-     this->controller.sendData(pgm_read_byte(&this->font[(ch-32)*fontWidth+fontOffset+i])); 
-    }
-    return 1;
-  }
-  virtual int availableForWrite() const {
-    return true;
-  }
-};
+  };
+}}
 
 /*
 class DisplayMode {
@@ -165,9 +168,7 @@ namespace TOGoS {
     class ComponentClass {
       virtual const char *getName() const = 0;
     };
-
     
-
     class Kernel {
       void update() {
       }
@@ -177,8 +178,8 @@ namespace TOGoS {
 
 
 
-TOGoS_SSD1306Controller oledController(Wire, 0x3C);
-TOGoS_SSD1306Printer oledPrinter(oledController, font8x8);
+TOGoS::SSD1306::Controller oledController(Wire, 0x3C);
+TOGoS::SSD1306::Printer oledPrinter(oledController, font8x8);
 
 void setup() {
   Wire.begin();

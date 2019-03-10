@@ -8,6 +8,17 @@ battery and light controllers.
 If you want to basically throw all similar Arduino/ESP8266 projects in here
 so they can share code more easily or whatever, that would probably be fine.
 
+- Use it at home!
+- Take it on the road!
+- One kernel, multiple modules!
+- It's a WiFi hub!
+- Super flexible software; maybe do like the LED lamps w/ built-in WiFi network
+- How to connect to existing WiFi?
+  - For starters, standardize configuration over serial port
+  - If going the Forth route, will need to add [refcounted] strings!
+- https://iot.stackexchange.com/questions/651/how-can-i-easily-configure-wi-fi-on-a-smart-device-without-a-screen
+  - https://en.wikipedia.org/wiki/Wi-Fi_Protected_Setup
+
 *** Desired sofware features
 
 - WiFi repeater
@@ -18,6 +29,11 @@ so they can share code more easily or whatever, that would probably be fine.
 
 - Play around with https://github.com/martin-ger/esp_wifi_repeater for inspiration
 - Look into using ENC28J60 for connecting to ethernet
+
+- Maybe have a ComputerSimulator in it, just to test out the idea
+  - Alternatively, just make a virtual OLED display - send vt-100 commands on the serial port
+  - Ideally do both: use ComputerSimulator internally to drive the [virtual] LED display
+
 
 *** Desired hardware features
 

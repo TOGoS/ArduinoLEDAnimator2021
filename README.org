@@ -23,7 +23,7 @@ so they can share code more easily or whatever, that would probably be fine.
 
 - WiFi repeater
   - Look into 
-- Reporting via MQTT
+- Reporting via MQTT or by serial
 - Display via I2C OLED screen
 - Dynamic configuration over WiFi
 
@@ -44,3 +44,21 @@ so they can share code more easily or whatever, that would probably be fine.
   - 9V internal backup battery
 - A ~12V output port
 - OLED screen for showing status
+
+** Software design
+
+*** Kernel
+
+Facilitiates communication between components.
+
+Components are named.
+
+Components communicate by sending messages through the kernel.
+Messages have a scope bit that indicates how far they go.
+
+*** Components
+
+Things that can be added at runtime;
+usually for interfacing with hardware.
+
+Should have ability to exclude module classes at compile time.

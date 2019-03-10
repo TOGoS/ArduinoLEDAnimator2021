@@ -1,5 +1,5 @@
-#ifndef FONT5x7_H
-#define FONT5x7_H
+#pragma once
+#include "TOGoS/SSD1306/font.h"
 
 // 5x7 Font ASCII 32 - 127 Implemented
 // Users can modify this to support more characters (glyphs)
@@ -109,5 +109,3 @@ OLEDFONT(font5x7) PROGMEM =
   0x41, 0x41, 0x36, 0x08, 0x00, // }
   0x02, 0x01, 0x02, 0x04, 0x02  // ~
 };
-#endif  // font5x7_h
-

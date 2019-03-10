@@ -1,5 +1,5 @@
-#ifndef FONT8x8_H
-#define FONT8x8_H
+#pragma once
+#include "font.h"
 
 // 8x8 Font ASCII 32 - 127 Implemented
 // Users can modify this to support more characters (glyphs)
@@ -110,5 +110,3 @@ OLEDFONT(font8x8) PROGMEM =
   0x00,0x42,0x42,0x76,0x08,0x08,0x00,0x00,  // }
   0x00,0x00,0x04,0x02,0x04,0x02,0x00,0x00,  // ~
 };
-
-#endif

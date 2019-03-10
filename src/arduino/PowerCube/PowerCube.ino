@@ -1,20 +1,6 @@
-
-// #include "TOGSSD1306.h"
-
 #include <Wire.h>
 
-// Make font stuff work
-#ifdef __AVR__
-  #include <avr/pgmspace.h>
-  #define OLEDFONT(name) static const uint8_t __attribute__ ((progmem))_n[]
-#elif defined(ESP8266)
-  #include <pgmspace.h>
-  #define OLEDFONT(name) static const uint8_t name[]
-#else
-  #define pgm_read_byte(addr) (*(const uint8_t *)(addr))
-  #define OLEDFONT(name) static const uint8_t name[]
-#endif
-#include "TOGSSD1306/font8x8.h"
+#include "TOGoS/SSD1306/font8x8.h"
 
 // Data sheet for the SSD1306: https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
@@ -169,6 +155,27 @@ class DisplayMode {
   virtual void update() = 0;
 }
 */
+
+namespace TOGoS {
+  namespace PowerCube {
+    class Component {
+      virtual void setEnabled(bool enabled);
+      virtual bool getEnabled() const;
+    };
+    class ComponentClass {
+      virtual const char *getName() const = 0;
+    };
+
+    
+
+    class Kernel {
+      void update() {
+      }
+    };
+  }
+}
+
+
 
 TOGoS_SSD1306Controller oledController(Wire, 0x3C);
 TOGoS_SSD1306Printer oledPrinter(oledController, font8x8);

@@ -1,30 +1,78 @@
 #include <Wire.h>
+#include <map>
 
 #include "TOGoS/SSD1306/font8x8.h"
 #include "TOGoS/SSD1306/Controller.h"
 #include "TOGoS/SSD1306/Printer.h"
 
-namespace TOGoS {
-  namespace PowerCube {
-    class Component {
-      virtual void setEnabled(bool enabled);
-      virtual bool getEnabled() const;
-    };
-    class ComponentClass {
-      virtual const char *getName() const = 0;
-    };
-    
-    class Kernel {
-      void update() {
+namespace TOGoS { namespace PowerCube {
+  class Kernel;
+
+  class Component {
+  public:
+    virtual void update() = 0;
+    virtual ~Component() = default;
+  };
+  class ComponentClass {
+  public:
+    virtual Component *createInstance(Kernel *kernel, const char *name) = 0;
+    virtual void deleteInstance(Component *) = 0;
+  };
+
+  class Kernel {
+  public:
+    std::map<std::string,ComponentClass*> componentClasses;
+    std::map<std::string,Component*> components;
+    unsigned int currentTickNumber = 0;
+    unsigned int getCurrentTickNumber() { return this->currentTickNumber; }
+    void initialize() {
+    }
+    void update() {
+      for (auto &c : this->components) {
+        c.second->update();
       }
-    };
-  }
-}
+      ++currentTickNumber;
+    }
+  };
+
+  class Echoer : public Component {
+    Kernel *kernel;
+    std::string name;
+  public:
+    Echoer(Kernel *kernel, const char *name) : kernel(kernel), name(name) {
+    }
+    virtual void update() override {
+      if( this->kernel->getCurrentTickNumber() % 100 == 0 ) {
+        Serial.print("Bro, it's ");
+        Serial.print(this->kernel->getCurrentTickNumber());
+        Serial.print(" -- ");
+        Serial.println(this->name.c_str());
+      }
+    }
+  };
+  class EchoerClass : public ComponentClass {
+  public:
+    virtual Component *createInstance(Kernel *kernel, const char *name) override {
+      return new Echoer(kernel, name);
+    }
+    virtual void deleteInstance(Component *comp) {
+      delete comp;
+    }
+  };
+}}
 
 TOGoS::SSD1306::Controller oledController(Wire, 0x3C);
 TOGoS::SSD1306::Printer oledPrinter(oledController, font8x8);
 
+TOGoS::PowerCube::EchoerClass echoerClass;
+
+TOGoS::PowerCube::Kernel kernel;
+
 void setup() {
+  Serial.begin(115200);
+  kernel.initialize();
+  kernel.components["bob"] = echoerClass.createInstance(&kernel, "bob");
+
   Wire.begin();
   oledController.initialize();
   oledController.displayOn();
@@ -44,6 +92,7 @@ int brightnessDirection = 1;
 uint8_t brightness = 128;
 
 void loop() {
+  kernel.update();
   if( brightness == 0 && brightnessDirection < 0 ) {
     brightnessDirection = 1;
   }

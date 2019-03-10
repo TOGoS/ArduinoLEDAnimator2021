@@ -1,5 +1,6 @@
 #pragma once
 #include "Controller.h"
+#include <Print.h>
 
 namespace TOGoS { namespace SSD1306 {
   class Printer : public Print {

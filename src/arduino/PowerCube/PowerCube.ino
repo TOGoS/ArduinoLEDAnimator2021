@@ -1,21 +1,46 @@
 #include <Wire.h>
+#include <Print.h>
 #include <map>
 
 #include "TOGoS/SSD1306/font8x8.h"
 #include "TOGoS/SSD1306/Controller.h"
 #include "TOGoS/SSD1306/Printer.h"
 
+/** Intended as a drop-in replacement for std::string_view */
+struct string_view {
+  const char *_begin;
+  size_t _size;
+  string_view(const char *str) : _begin(str), _size(strlen(str)) {}
+  const char *begin() const { return this->_begin; }
+  const char *end() const { return this->_begin + this->_size; }
+  size_t size() const { return this->_size; }
+  operator std::string() const { return std::string(this->begin(), this->size()); }
+};
+
+Print & operator<<(Print &p, const string_view& sv) {
+  p.write(sv.begin(), sv.size());
+}
+
 namespace TOGoS { namespace PowerCube {
   class Kernel;
+
+  struct ComponentMessage {
+    string_view componentName;
+    string_view subTopic;
+    string_view payload;
+    ComponentMessage(const string_view &c, const string_view &t, const string_view &p) :
+      componentName(c), subTopic(t), payload(p) {}
+  };
 
   class Component {
   public:
     virtual void update() = 0;
+    virtual void onMessage(const ComponentMessage& m) = 0;
     virtual ~Component() = default;
   };
   class ComponentClass {
   public:
-    virtual Component *createInstance(Kernel *kernel, const char *name) = 0;
+    virtual Component *createInstance(Kernel *kernel, const string_view &name) = 0;
     virtual void deleteInstance(Component *) = 0;
   };
 
@@ -26,6 +51,11 @@ namespace TOGoS { namespace PowerCube {
     unsigned int currentTickNumber = 0;
     unsigned int getCurrentTickNumber() { return this->currentTickNumber; }
     void initialize() {
+    }
+    void deliverMessage(const ComponentMessage &m) {
+      if( this->components.count(m.componentName) ) {
+        this->components[m.componentName]->onMessage(m);
+      }
     }
     void update() {
       for (auto &c : this->components) {
@@ -39,20 +69,27 @@ namespace TOGoS { namespace PowerCube {
     Kernel *kernel;
     std::string name;
   public:
-    Echoer(Kernel *kernel, const char *name) : kernel(kernel), name(name) {
+    Echoer(Kernel *kernel, const string_view &name) : kernel(kernel), name(name) {
+    }
+    virtual void onMessage(const ComponentMessage& m) override {
+      Serial << m.componentName;
+      Serial << ": got ";
+      Serial << m.subTopic;
+      Serial << " message: ";
+      Serial << m.payload;
+      Serial << "\n";
     }
     virtual void update() override {
       if( this->kernel->getCurrentTickNumber() % 100 == 0 ) {
-        Serial.print("Bro, it's ");
-        Serial.print(this->kernel->getCurrentTickNumber());
-        Serial.print(" -- ");
-        Serial.println(this->name.c_str());
+        Serial.print(this->name.c_str());
+        Serial.print(": Bro, it's ");
+        Serial.println(this->kernel->getCurrentTickNumber());
       }
     }
   };
   class EchoerClass : public ComponentClass {
   public:
-    virtual Component *createInstance(Kernel *kernel, const char *name) override {
+    virtual Component *createInstance(Kernel *kernel, const string_view &name) override {
       return new Echoer(kernel, name);
     }
     virtual void deleteInstance(Component *comp) {
@@ -93,6 +130,10 @@ uint8_t brightness = 128;
 
 void loop() {
   kernel.update();
+  if( kernel.getCurrentTickNumber() % 75 == 0 ) {
+    kernel.deliverMessage(TOGoS::PowerCube::ComponentMessage("bob", "hello", "123"));
+  }
+  
   if( brightness == 0 && brightnessDirection < 0 ) {
     brightnessDirection = 1;
   }

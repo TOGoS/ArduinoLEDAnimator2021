@@ -65,6 +65,11 @@ namespace TOGoS { namespace PowerCube {
     }
   };
 
+  Kernel &operator<<(Kernel &kernel, const ComponentMessage &m) {
+    kernel.deliverMessage(m);
+    return kernel;
+  }
+
   class Echoer : public Component {
     Kernel *kernel;
     std::string name;
@@ -131,7 +136,7 @@ uint8_t brightness = 128;
 void loop() {
   kernel.update();
   if( kernel.getCurrentTickNumber() % 75 == 0 ) {
-    kernel.deliverMessage(TOGoS::PowerCube::ComponentMessage("bob", "hello", "123"));
+    kernel << TOGoS::PowerCube::ComponentMessage("bob", "hello", "123");
   }
   
   if( brightness == 0 && brightnessDirection < 0 ) {

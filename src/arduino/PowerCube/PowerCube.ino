@@ -23,15 +23,12 @@ using StringView = TOGoS::StringView;
 TOGoS::SSD1306::Controller oledController(Wire, 0x3C);
 TOGoS::SSD1306::Printer oledPrinter(oledController, font8x8);
 
-TOGoS::PowerCube::EchoerClass echoerClass;
-
 TOGoS::PowerCube::Kernel kernel;
 
 void setup() {
   Serial.begin(115200);
   kernel.initialize();
   kernel.components["serial-command-runner"] = new TOGoS::PowerCube::CommandRunner(&kernel, Serial);
-  //kernel.components["bob"] = echoerClass.createInstance(&kernel, "bob");
 
   Wire.begin();
   oledController.initialize();
@@ -53,9 +50,6 @@ uint8_t brightness = 128;
 
 void loop() {
   kernel.update();
-  if( kernel.getCurrentTickNumber() % 75 == 0 ) {
-    kernel << TOGoS::PowerCube::ComponentMessage("bob", "hello", "123");
-  }
 
   if( kernel.getCurrentTickNumber() % 100 == 0 ) {
     if( brightness == 0 && brightnessDirection < 0 ) {

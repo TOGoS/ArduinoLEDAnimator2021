@@ -17,12 +17,34 @@
 namespace TOGoS { namespace PowerCube {
   class Kernel;
 
+  struct Path {
+    static const uint8_t maxPartCount = 2;
+    uint8_t length;
+    StringView parts[maxPartCount];
+    Path &operator<<(const StringView& p) {
+      if( this->length < maxPartCount ) {
+	this->parts[this->length++] = p;
+      }
+    }
+    const StringView& operator[](uint8_t index) const { return this->parts[index]; }
+    StringView& operator[](uint8_t index) { return this->parts[index]; }
+  };
+  Print &operator<<(Print& p, const Path& path);
+
+  namespace PubBits {
+    enum {
+      Internal = 1,
+      Serial = 2,
+      Network = 4
+    };
+  };
+
   struct ComponentMessage {
-    StringView componentName;
-    StringView subTopic;
+    Path path;
     StringView payload;
-    ComponentMessage(const StringView &c, const StringView &t, const StringView &p) :
-      componentName(c), subTopic(t), payload(p) {}
+    uint8_t pubBits;
+    ComponentMessage(const Path &path, const StringView &p, uint8_t pubBits)
+      : path(path), payload(p), pubBits(pubBits) {}
   };
 
   class Component {
@@ -46,8 +68,12 @@ namespace TOGoS { namespace PowerCube {
     void initialize() {
     }
     void deliverMessage(const ComponentMessage &m) {
-      if( this->components.count(m.componentName) ) {
-        this->components[m.componentName]->onMessage(m);
+      if( (m.pubBits & PubBits::Serial) != 0 ) {
+	this->getLogStream() << m.path << " " << m.payload << "\n";
+      }
+      if( (m.pubBits & PubBits::Internal) != 0 &&
+	  m.path.length >= 1 && this->components.count(m.path[0]) ) {
+        this->components[m.path[0]]->onMessage(m);
       }
     }
     void update() {
@@ -60,38 +86,6 @@ namespace TOGoS { namespace PowerCube {
   };
 
   Kernel &operator<<(Kernel &kernel, const ComponentMessage &m);
-
-  class Echoer : public Component {
-    Kernel *kernel;
-    std::string name;
-  public:
-    Echoer(Kernel *kernel, const StringView &name) : kernel(kernel), name(name) {
-    }
-    virtual void onMessage(const ComponentMessage& m) override {
-      Serial << m.componentName;
-      Serial << ": got ";
-      Serial << m.subTopic;
-      Serial << " message: ";
-      Serial << m.payload;
-      Serial << "\n";
-    }
-    virtual void update() override {
-      if( this->kernel->getCurrentTickNumber() % 100 == 0 ) {
-        Serial.print(this->name.c_str());
-        Serial.print(": Bro, it's ");
-        Serial.println(this->kernel->getCurrentTickNumber());
-      }
-    }
-  };
-  class EchoerClass : public ComponentClass {
-  public:
-    virtual Component *createInstance(Kernel *kernel, const StringView &name) override {
-      return new Echoer(kernel, name);
-    }
-    virtual void deleteInstance(Component *comp) {
-      delete comp;
-    }
-  };
 }}
 
 #endif

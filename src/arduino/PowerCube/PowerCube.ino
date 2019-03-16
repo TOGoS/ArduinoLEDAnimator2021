@@ -28,7 +28,7 @@ TOGoS::PowerCube::Kernel kernel;
 void setup() {
   Serial.begin(115200);
   kernel.initialize();
-  kernel.components["serial-command-runner"] = new TOGoS::PowerCube::CommandRunner(&kernel, Serial);
+  kernel.components["serial-command-runner"].reset(new TOGoS::PowerCube::CommandRunner(&kernel, Serial));
 
   Wire.begin();
   oledController.initialize();

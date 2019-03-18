@@ -10,9 +10,14 @@ Print &TOGoS::PowerCube::operator<<(Print& p, const Path& path) {
     if( i != 0 ) p << "/";
     p << path.parts[i];
   }
+  return p;
 }
 
 Kernel &TOGoS::PowerCube::operator<<(Kernel &kernel, const ComponentMessage &m) {
   kernel.deliverMessage(m);
   return kernel;
+}
+
+Print &TOGoS::PowerCube::operator<<(Print &p, const ComponentMessage &cm) {
+  return p << cm.path << " " << cm.payload;
 }

@@ -8,3 +8,9 @@ Print & operator<<(Print &p, const TOGoS::StringView& sv)
   return p;
 }
 
+Print & operator<<(Print &p, int num)
+{
+  p.print(num);
+  return p;
+}
+

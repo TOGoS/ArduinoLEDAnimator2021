@@ -10,6 +10,7 @@ namespace TOGoS {
   struct StringView {
     const char *_begin;
     size_t _size;
+    StringView() : _begin(nullptr), _size(0) {}
     StringView(const char *str) : _begin(str), _size(strlen(str)) {}
     StringView(const char *str, size_t len) : _begin(str), _size(len) {}
     StringView(const std::string& str) : _begin(str.data()), _size(str.size()) {}

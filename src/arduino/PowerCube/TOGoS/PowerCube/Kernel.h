@@ -26,6 +26,8 @@ namespace TOGoS { namespace PowerCube {
 	this->parts[this->length++] = p;
       }
     }
+    const StringView *begin() const { return this->parts; }
+    const StringView *end() const { return this->parts + this->length; }
     const StringView& operator[](uint8_t index) const { return this->parts[index]; }
     StringView& operator[](uint8_t index) { return this->parts[index]; }
   };
@@ -42,10 +44,12 @@ namespace TOGoS { namespace PowerCube {
   struct ComponentMessage {
     Path path;
     StringView payload;
-    uint8_t pubBits;
+    uint8_t pubBits = 0;
+    ComponentMessage() {}
     ComponentMessage(const Path &path, const StringView &p, uint8_t pubBits)
       : path(path), payload(p), pubBits(pubBits) {}
   };
+  Print &operator<<(Print& p, const ComponentMessage& cm);
 
   class Component {
   public:

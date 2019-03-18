@@ -19,7 +19,7 @@ namespace TOGoS { namespace PowerCube {
 
   struct Path {
     static const uint8_t maxPartCount = 2;
-    uint8_t length;
+    uint8_t length = 0;
     StringView parts[maxPartCount];
     Path &operator<<(const StringView& p) {
       if( this->length < maxPartCount ) {

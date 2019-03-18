@@ -5,5 +5,6 @@ class TOGoS::StringView;
 class Print;
 
 Print & operator<<(Print &p, const TOGoS::StringView& sv);
+Print & operator<<(Print &p, int num);
 
 #endif

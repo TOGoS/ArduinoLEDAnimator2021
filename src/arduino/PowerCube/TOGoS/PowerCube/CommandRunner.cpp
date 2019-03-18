@@ -1,6 +1,7 @@
 #include "CommandRunner.h"
 
 using Kernel = TOGoS::PowerCube::Kernel;
+namespace PubBits = TOGoS::PowerCube::PubBits;
 using CommandRunner = TOGoS::PowerCube::CommandRunner;
 
 CommandRunner::CommandRunner(Kernel *kernel, Stream& stream) : kernel(kernel), stream(stream) {}  
@@ -38,9 +39,11 @@ void CommandRunner::update() {
     CommandBuffer::BufferState bufState = this->commandBuffer.onChar(this->stream.read());
     if( bufState == CommandBuffer::BufferState::READY ) {
       ComponentMessage cm = parseMessage(this->commandBuffer.str());
-      this->kernel->getLogStream() << "# bits = " << (uint32_t)cm.pubBits << "\n"; // << cm << "\n";
-      for( auto &ps : cm.path ) this->kernel->getLogStream() << "# Path segment: " << ps << "\n";
-      this->kernel->getLogStream() << "# Payload: " << cm.payload << "\n";
+      cm.pubBits = PubBits::Internal;
+      *this->kernel << cm;
+      //this->kernel->getLogStream() << "# bits = " << (uint32_t)cm.pubBits << "\n"; // << cm << "\n";
+      //for( auto &ps : cm.path ) this->kernel->getLogStream() << "# Path segment: " << ps << "\n";
+      //this->kernel->getLogStream() << "# Payload: " << cm.payload << "\n";
       //this->kernel->getLogStream() << "# Read command: " << this->commandBuffer.str() << "\n";
     }
   }

@@ -10,7 +10,6 @@
 
 // My libraries
 #include "../StringView.h"
-#include "../stream_operators.h"
 
 // TODO: Split this up
 
@@ -69,23 +68,8 @@ namespace TOGoS { namespace PowerCube {
     std::map<std::string,Component*> components; // TODO: should probably be shared_ or unique_ptrs
     unsigned int currentTickNumber = 0;
     unsigned int getCurrentTickNumber() { return this->currentTickNumber; }
-    void initialize() {
-    }
-    void deliverMessage(const ComponentMessage &m) {
-      if( (m.pubBits & PubBits::Serial) != 0 ) {
-	this->getLogStream() << m.path << " " << m.payload << "\n";
-      }
-      if( (m.pubBits & PubBits::Internal) != 0 &&
-	  m.path.length >= 1 && this->components.count(m.path[0]) ) {
-        this->components[m.path[0]]->onMessage(m);
-      }
-    }
-    void update() {
-      for (auto &c : this->components) {
-        c.second->update();
-      }
-      ++currentTickNumber;
-    }
+    void deliverMessage(const ComponentMessage &m);
+    void update();
     Print& getLogStream() { return Serial; }
   };
 

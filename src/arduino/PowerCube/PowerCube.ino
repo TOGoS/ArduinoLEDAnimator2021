@@ -3,6 +3,7 @@
 #include <map>
 
 #include "TOGoS/PowerCube/CommandRunner.h"
+#include "TOGoS/PowerCube/Echoer.h"
 #include "TOGoS/PowerCube/Kernel.h"
 #include "TOGoS/SSD1306/font8x8.h"
 #include "TOGoS/SSD1306/Controller.h"
@@ -27,8 +28,8 @@ TOGoS::PowerCube::Kernel kernel;
 
 void setup() {
   Serial.begin(115200);
-  kernel.initialize();
   kernel.components["serial-command-runner"] = new TOGoS::PowerCube::CommandRunner(&kernel, Serial);
+  kernel.components["echoer"] = new TOGoS::PowerCube::Echoer(Serial);
 
   Wire.begin();
   oledController.initialize();

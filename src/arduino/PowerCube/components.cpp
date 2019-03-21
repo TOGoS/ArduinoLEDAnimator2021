@@ -7,5 +7,6 @@
 
 #include "TOGoS/PowerCube/CommandBuffer.cpp"
 #include "TOGoS/PowerCube/CommandRunner.cpp"
+#include "TOGoS/PowerCube/DHTReader.cpp"
 #include "TOGoS/SSD1306/Controller.cpp"
 #include "TOGoS/SSD1306/Printer.cpp"

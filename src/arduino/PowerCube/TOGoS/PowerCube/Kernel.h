@@ -15,6 +15,7 @@
 
 namespace TOGoS { namespace PowerCube {
   class Kernel;
+  using KernelPtr = Kernel*;
 
   struct Path {
     static const uint8_t maxPartCount = 2;
@@ -59,7 +60,7 @@ namespace TOGoS { namespace PowerCube {
   };
   class ComponentClass {
   public:
-    virtual Component *createInstance(Kernel *kernel, const StringView &name) = 0;
+    virtual Component *createInstance(KernelPtr kernel, const StringView &name) = 0;
     virtual void deleteInstance(Component *) = 0;
   };
 

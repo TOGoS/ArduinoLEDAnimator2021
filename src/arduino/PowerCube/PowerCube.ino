@@ -3,6 +3,7 @@
 #include <map>
 
 #include "TOGoS/PowerCube/CommandRunner.h"
+#include "TOGoS/PowerCube/DHTReader.h"
 #include "TOGoS/PowerCube/Echoer.h"
 #include "TOGoS/PowerCube/Kernel.h"
 #include "TOGoS/SSD1306/font8x8.h"
@@ -11,7 +12,6 @@
 #include "TOGoS/StringView.h"
 #include "TOGoS/stream_operators.h"
 
-// TODO (technical): parse messages
 // TODO (story): read temperature and humidity, show on OLED screen
 // TODO (story): turn on and off a relay based on messages from serial port
 // TODO (story): thermostat - turn a switch on and off based on temperature
@@ -30,6 +30,7 @@ void setup() {
   Serial.begin(115200);
   kernel.components["serial-command-runner"] = new TOGoS::PowerCube::CommandRunner(&kernel, Serial);
   kernel.components["echoer"] = new TOGoS::PowerCube::Echoer(Serial);
+  kernel.components["dht6"] = new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22);
 
   Wire.begin();
   oledController.initialize();

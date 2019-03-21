@@ -24,6 +24,7 @@ namespace TOGoS { namespace PowerCube {
       if( this->length < maxPartCount ) {
 	this->parts[this->length++] = p;
       }
+      return *this;
     }
     const StringView *begin() const { return this->parts; }
     const StringView *end() const { return this->parts + this->length; }

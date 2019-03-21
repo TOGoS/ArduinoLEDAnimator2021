@@ -3,6 +3,7 @@
 
 // Standard libraries
 #include <map>
+#include <memory>
 
 // Arduino libraries
 #include <Print.h>
@@ -58,16 +59,10 @@ namespace TOGoS { namespace PowerCube {
     virtual void onMessage(const ComponentMessage& m) {}
     virtual ~Component() = default;
   };
-  class ComponentClass {
-  public:
-    virtual Component *createInstance(KernelPtr kernel, const StringView &name) = 0;
-    virtual void deleteInstance(Component *) = 0;
-  };
 
   class Kernel {
   public:
-    std::map<std::string,ComponentClass*> componentClasses; // TODO: should probably be shared_ or unique_ptrs
-    std::map<std::string,Component*> components; // TODO: should probably be shared_ or unique_ptrs
+    std::map<std::string,std::unique_ptr<Component>> components; // TODO: should probably be shared_ or unique_ptrs
     unsigned int currentTickNumber = 0;
     unsigned int getCurrentTickNumber() { return this->currentTickNumber; }
     void deliverMessage(const ComponentMessage &m);

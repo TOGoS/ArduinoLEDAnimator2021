@@ -28,9 +28,9 @@ TOGoS::PowerCube::Kernel kernel;
 
 void setup() {
   Serial.begin(115200);
-  kernel.components["serial-command-runner"] = new TOGoS::PowerCube::CommandRunner(&kernel, Serial);
-  kernel.components["echoer"] = new TOGoS::PowerCube::Echoer(Serial);
-  kernel.components["dht6"] = new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22);
+  kernel.components["serial-command-runner"].reset(new TOGoS::PowerCube::CommandRunner(&kernel, Serial));
+  kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
+  kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
 
   Wire.begin();
   oledController.initialize();

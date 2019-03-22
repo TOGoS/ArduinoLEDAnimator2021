@@ -17,8 +17,13 @@ namespace TOGoS { namespace PowerCube {
     std::string name;
     DHT dht;
     unsigned long lastReadTime = 0;
+    float prevHumidity = NAN;
+    unsigned long prevHumidityReportTime = 0;
+    float prevTemperature = NAN;
+    unsigned long prevTemperatureReportTime = 0;
   public:
     unsigned long readInterval = 1000;
+    unsigned long maxReportInterval = 60000;
     DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type);
     virtual void update() override;
   };

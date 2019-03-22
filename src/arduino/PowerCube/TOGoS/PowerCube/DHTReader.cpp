@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <DHT.h>
+#include <math.h>
 #include "DHTReader.h"
 #include "../BufferPrint.h"
 
@@ -13,6 +14,10 @@ DHTReader::DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint
   this->dht.begin();
 }
 
+static bool isSame(float a, float b) {
+  if( isnan(a) && isnan(b) ) return true;
+  return a == b;
+}
 
 void DHTReader::update() {
   unsigned long currentTime = millis();
@@ -22,13 +27,21 @@ void DHTReader::update() {
     float temp = this->dht.readTemperature();
     float humid = this->dht.readHumidity();
 
-    formatter.clear();
-    formatter << temp;
-    this->kernel->deliverMessage(ComponentMessage(Path() << this->name << "temperature", formatter.str(), PubBits::Internal|PubBits::Serial));
+    if( !isSame(temp, this->prevTemperature) || currentTime - this->prevTemperatureReportTime > this->maxReportInterval ) {
+      formatter.clear();
+      formatter << temp;
+      this->kernel->deliverMessage(ComponentMessage(Path() << this->name << "temperature", formatter.str(), PubBits::All));
+      this->prevTemperature = temp;
+      this->prevTemperatureReportTime = currentTime;
+    }
 
-    formatter.clear();
-    formatter << humid;
-    this->kernel->deliverMessage(ComponentMessage(Path() << this->name << "humidity", formatter.str(), PubBits::Internal|PubBits::Serial));
+    if( !isSame(humid, this->prevHumidity) || currentTime - this->prevHumidityReportTime > this->maxReportInterval ) {
+      formatter.clear();
+      formatter << humid;
+      this->kernel->deliverMessage(ComponentMessage(Path() << this->name << "humidity", formatter.str(), PubBits::All));
+      this->prevHumidity = humid;
+      this->prevHumidityReportTime = currentTime;
+    }
 
     this->lastReadTime = currentTime;
   }

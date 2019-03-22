@@ -18,6 +18,10 @@ namespace TOGoS {
     const char *end() const { return this->_begin + this->_size; }
     size_t size() const { return this->_size; }
     operator std::string() const { return std::string(this->begin(), this->size()); }
+    bool operator==(const StringView &other) const {
+      if( other.size() != this->_size ) return false;
+      return memcmp(this->begin(), other.begin(), this->_size) == 0;
+    }
   };
 }
 

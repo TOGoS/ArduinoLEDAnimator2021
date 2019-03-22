@@ -19,7 +19,7 @@ namespace TOGoS { namespace PowerCube {
   using KernelPtr = Kernel*;
 
   struct Path {
-    static const uint8_t maxPartCount = 2;
+    static const uint8_t maxPartCount = 3;
     uint8_t length = 0;
     StringView parts[maxPartCount];
     Path &operator<<(const StringView& p) {
@@ -39,7 +39,8 @@ namespace TOGoS { namespace PowerCube {
     enum {
       Internal = 1,
       Serial = 2,
-      Network = 4
+      Network = 4,
+      All = 7,
     };
   };
 

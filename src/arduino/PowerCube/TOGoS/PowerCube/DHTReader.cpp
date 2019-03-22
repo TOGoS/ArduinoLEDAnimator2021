@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <DHT.h>
 #include "DHTReader.h"
 #include "../BufferPrint.h"
@@ -7,7 +8,7 @@ namespace PubBits = TOGoS::PowerCube::PubBits;
 using DHTReader = TOGoS::PowerCube::DHTReader;
 
 void DHTReader::update() {
-  uint32_t currentTime = millis();
+  unsigned long currentTime = millis();
   if( this->lastReadTime == 0 || currentTime - this->lastReadTime > this->readInterval ) {
     char formatted[10];
     BufferPrint formatter(formatted, sizeof(formatted));

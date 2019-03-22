@@ -4,6 +4,7 @@
 
 #include "TOGoS/PowerCube/CommandRunner.h"
 #include "TOGoS/PowerCube/DHTReader.h"
+#include "TOGoS/PowerCube/DigitalSwitch.h"
 #include "TOGoS/PowerCube/Echoer.h"
 #include "TOGoS/PowerCube/Kernel.h"
 #include "TOGoS/SSD1306/font8x8.h"
@@ -26,11 +27,22 @@ TOGoS::SSD1306::Printer oledPrinter(oledController, font8x8);
 
 TOGoS::PowerCube::Kernel kernel;
 
+void dumpPinList() {
+  Serial.print("# D1 = "); Serial.println(D1);
+  Serial.print("# D2 = "); Serial.println(D2);
+  Serial.print("# D3 = "); Serial.println(D3);
+  Serial.print("# D4 = "); Serial.println(D4);
+  Serial.print("# D5 = "); Serial.println(D5);
+  Serial.print("# D6 = "); Serial.println(D6);
+  Serial.print("# D7 = "); Serial.println(D7);
+  Serial.print("# D8 = "); Serial.println(D8);
+  Serial.print("# BUILTIN_LED = "); Serial.println(BUILTIN_LED);
+}
+
 void setup() {
   Serial.begin(115200);
-  kernel.components["serial-command-runner"].reset(new TOGoS::PowerCube::CommandRunner(&kernel, Serial));
-  kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
-  kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
+
+  delay(500);
 
   Wire.begin();
   oledController.initialize();
@@ -45,6 +57,15 @@ void setup() {
     oledPrinter.println(i);
     delay(1000);
   }
+
+  dumpPinList();
+
+  kernel.components["serial-command-runner"].reset(new TOGoS::PowerCube::CommandRunner(&kernel, Serial));
+  kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
+  kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
+  kernel.components["dht7"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht7", D7, DHT22));
+  //kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
+  kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
 }
 
 int brightnessDirection = 1;

@@ -16,9 +16,9 @@ namespace TOGoS { namespace PowerCube {
     KernelPtr kernel;
     std::string name;
     DHT dht;
-    uint32_t lastReadTime = 0;
+    unsigned long lastReadTime = 0;
   public:
-    uint32_t readInterval = 1000;
+    unsigned long readInterval = 1000;
     DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type) : kernel(kernel), name(name), dht(pin,type) { }
     virtual void update() override;
   };

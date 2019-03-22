@@ -19,7 +19,7 @@ namespace TOGoS { namespace PowerCube {
     unsigned long lastReadTime = 0;
   public:
     unsigned long readInterval = 1000;
-    DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type) : kernel(kernel), name(name), dht(pin,type) { }
+    DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type);
     virtual void update() override;
   };
 }}

@@ -7,6 +7,13 @@ using Kernel = TOGoS::PowerCube::Kernel;
 namespace PubBits = TOGoS::PowerCube::PubBits;
 using DHTReader = TOGoS::PowerCube::DHTReader;
 
+DHTReader::DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type)
+  : kernel(kernel), name(name), dht(pin,type)
+{
+  this->dht.begin();
+}
+
+
 void DHTReader::update() {
   unsigned long currentTime = millis();
   if( this->lastReadTime == 0 || currentTime - this->lastReadTime > this->readInterval ) {

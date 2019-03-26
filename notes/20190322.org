@@ -1,0 +1,116 @@
+Why are DHT readings coming back undefined?
+
+#+BEGIN_SRC
+# D1 = 5
+# D2 = 4
+# D3 = 0
+# D4 = 2
+# D5 = 14
+# D6 = 12
+# D7 = 13
+# D8 = 15
+# BUILTIN_LED = 16
+dht6/temperature 8.00
+dht6/humidity 3293.90
+dht6/temperature 8.00
+dht6/humidity 3293.90
+dht6/temperature nan
+dht6/humidity nan
+dht6/temperature nan
+dht6/humidity nan
+dht6/temperature nan
+dht6/humidity nan
+dht6/temperature nan
+...
+#+END_SRC
+
+Formerly it was because writing of floats wasn't working, which f66cff62d7b74af99272d91f12d64cde8397fefc should have fixed.
+
+Further debugging doesn't resolve anything:
+
+#+BEGIN_SRC
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:8.80 humidity:3291.40
+dht6/temperature 8.80
+dht6/humidity 3291.40
+# dht6: Read temperature:8.80 humidity:3291.40
+dht6/temperature 8.80
+dht6/humidity 3291.40
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:nan humidity:nan
+dht6/temperature nan
+dht6/humidity nan
+# dht6: Read temperature:8.80 humidity:3291.30
+dht6/temperature 8.80
+dht6/humidity 3291.30
+# dht6: Read temperature:8.80 humidity:3291.30
+dht6/temperature 8.80
+dht6/humidity 3291.30
+# dht6: Read temperature:8.80 humidity:3291.30
+dht6/temperature 8.80
+dht6/humidity 3291.30
+# dht6: Read temperature:8.80 humidity:3291.30
+dht6/temperature 8.80
+dht6/humidity 3291.30
+#+END_SRC
+
+Doesn't seem to be a formatting problem.
+This was working before!!!
+
+I've tried switching out the DHT22.
+No difference.
+
+LOL, wrong board was selected.  Not the first time I've had that problem!
+Switched to 'Wemos D1 R1' and...oh no it's still giving bad temperature/humidity readings.  :(
+
+What if I switch pins?  Do D7?  Still nans.
+
+Siwtch back to 58f775c33245f6dbdcc9f449ea23e0c54b5595bf (branch dht-debug).
+It didn't work back then, either!
+
+Change board to LOLIN(WEMOS) D1 R2 & mini.  Still no luck (numbers are formatted bad but I think it's still saying nan)
+
+Let's try ESP8266-MQTT-Sensor to see if it's just a programming problem.
+
+Yeah it looks fine here.  So it's not a problem with the hardware or board selection.
+
+#+BEGIN_SRC
+# IP address: 10.0.9.108
+# MAC address: 5C:CF:7F:34:44:75
+# Attempting MQTT connection to mqtt.sh.marvin.nuke24.net as 5C:CF:7F:34:44:75...connected
+# Hi I'm 5C:CF:7F:34:44:75 (ArduinoTemperatureHumiditySensor) and just connected!
+dht6/temperature 18.60
+dht6/humidity 36.40
+dht6/temperature 18.50
+dht6/humidity 35.90
+dht6/humidity 35.80
+dht6/humidity 35.70
+#+END_SRC
+
+#+BEGIN_SRC
+    dhtNodes[i].dht->begin();
+#+END_SRC
+
+Uh.
+
+Add ~dht.begin()~ to DHTReader constructor.
+
+#+BEGIN_SRC
+dht6/temperature 17.90
+dht6/humidity 35.50
+#+END_SRC
+
+Oh much better.

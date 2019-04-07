@@ -64,7 +64,7 @@ void setup() {
   kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
   kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
   kernel.components["dht7"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht7", D7, DHT22));
-  //kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
+  kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
   kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
 }
 

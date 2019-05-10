@@ -13,6 +13,33 @@
 #include "TOGoS/StringView.h"
 #include "TOGoS/stream_operators.h"
 
+#include <FastLED.h>
+#include <vector>
+
+
+template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class Controller, uint8_t DATA_PIN, EOrder RGB_ORDER>
+class FastLEDSequencer : TOGoS::PowerCube::Component {
+public:
+  std::vector<CRGB> colorData;
+  FastLEDSequencer(size_t ledCount)
+    : colorData(ledCount)
+  {
+    FastLED.addLeds<Controller, D4, RGB_ORDER>(this->colorData.data(), this->colorData.size());
+  }
+  void initialize() { }
+  void unshiftColor( CRGB color ) {
+    for( size_t i=colorData.size(); i > 0; --i ) {
+      colorData[i] = colorData[i-1];
+    }
+    colorData[0] = color;
+  }
+  void update() {
+    //this->controller.showLeds();   // Don't do this it makes you have seizures.
+    FastLED.show();
+  }
+};
+FastLEDSequencer<WS2812B, D4, GRB> fastLedController(11);
+
 // TODO (story): read temperature and humidity, show on OLED screen
 // TODO (story): turn on and off a relay based on messages from serial port
 // TODO (story): thermostat - turn a switch on and off based on temperature
@@ -66,10 +93,31 @@ void setup() {
   kernel.components["dht7"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht7", D7, DHT22));
   kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
   kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
+
+  fastLedController.initialize();
 }
 
 int brightnessDirection = 1;
 uint8_t brightness = 128;
+
+unsigned long lastColorPush = 0;
+
+class TriangleOscillator {
+  int current, delta, min, max;
+public:
+  TriangleOscillator( int current, int delta, int min, int max )
+    : current(current), delta(delta), min(min), max(max) {}
+  int next() {
+    current += delta;
+    if( current > max ) { current = max + max - current; delta = -delta; }
+    if( current < min ) { current = min + min - current; delta = -delta; }
+    return current;
+  }
+};
+
+TriangleOscillator rOsc(128, 13, 32, 255);
+TriangleOscillator gOsc(0, 19, 0, 255);
+TriangleOscillator bOsc(0, 23, 0, 255);
 
 void loop() {
   kernel.update();
@@ -87,6 +135,14 @@ void loop() {
     oledPrinter.print("Brightness: ");
     oledPrinter.println(brightness);
   }
+
+  unsigned long currentTime = millis();
+  if( lastColorPush == 0 || currentTime - lastColorPush > 50 ) {
+    fastLedController.unshiftColor( CRGB(rOsc.next(), gOsc.next(), bOsc.next()) );
+    lastColorPush = currentTime;
+  }
+  
+  fastLedController.update();
 }
 
 int hiCount = 0;

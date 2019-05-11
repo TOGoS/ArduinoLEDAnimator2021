@@ -62,3 +62,33 @@ Things that can be added at runtime;
 usually for interfacing with hardware.
 
 Should have ability to exclude module classes at compile time.
+
+*** Path conventions
+
+For MQTT, assume a device name path prefix.
+
+For OSC interfaces, shorter names for setters might make sense, e.g. ~somelight/state on~ instead of ~somelight/state/set on~.
+
+The device:
+- ~$device-name / status~ :: ~online~, ~disconnected~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
+
+For things that can be enabled/disabled:
+- ~$component-name / state~ ::
+  - ~disabled~ :: explicitly turned off
+  - ~enabled~ :: enabled but no further state information known
+  - ... :: other states when enabled
+
+Simple digital switches:
+- ~$component-name / state~ :: In addition to the possible ~enabled~, ~disabled~ (which don't indicate the switch state):
+  - ~on~
+  - ~off~
+
+Variable-brightness lights:
+- ~$component-name / state~ :: similar to digital switch; when 'off', LED should be unpowered
+- ~$component-name / brightness~ :: (0-1) brightness of light
+
+RGB[W] lights:
+- ~$component-name / state~ :: similar to digital switch; when 'off', LED should be unpowered
+- ~$component-name / brightness~ :: brightness (from 0-1) of the light, independent of color
+- ~$component-name / color~ :: color of the light
+

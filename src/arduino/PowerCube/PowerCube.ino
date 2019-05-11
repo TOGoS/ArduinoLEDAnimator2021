@@ -78,7 +78,7 @@ namespace TOGoS { namespace PowerCube {
     virtual void onMessage(const ComponentMessage& m) override {
       if( m.path.length >= 2 && m.path[m.path.length-2] == "pixelcolors" && m.path[m.path.length-1] == "unshift" ) {
         CRGB color = parseRgb(m.payload);
-        this->kernel->getLogStream() << "# " << this->name << "Unshifting color " << color << " lol\n";
+        // this->kernel->getLogStream() << "# " << this->name << "Unshifting color " << color << " lol\n";
         this->unshiftColor(color);
       }
       if( m.path.length >= 1 && m.path[m.path.length-1] == "debugloop" ) {
@@ -161,6 +161,7 @@ void setup() {
   kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
   kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
   kernel.components["fastleds"].reset(new TOGoS::PowerCube::FastLEDController<WS2812B, D1, GRB>(&kernel, "fastleds", 11));
+  kernel.components["whiteledstrip"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "whiteledstrip", D4, false));
 }
 
 int brightnessDirection = 1;
@@ -215,7 +216,6 @@ void loop() {
       rgbStr,
       TOGoS::PowerCube::PubBits::Internal
     ));
-    Serial << "# Want to unshift pixel color: " << rgbStr << "\n";
     lastColorPush = currentTime;
   }
 }

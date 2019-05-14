@@ -5,6 +5,7 @@
 #include "TOGoS/PowerCube/CommandRunner.h"
 #include "TOGoS/PowerCube/DHTReader.h"
 #include "TOGoS/PowerCube/DigitalSwitch.h"
+#include "TOGoS/PowerCube/FastLEDController.h"
 #include "TOGoS/PowerCube/Echoer.h"
 #include "TOGoS/PowerCube/Kernel.h"
 #include "TOGoS/SSD1306/font8x8.h"
@@ -124,7 +125,7 @@ void loop() {
     using ComponentMessage = TOGoS::PowerCube::ComponentMessage;
     using Path = TOGoS::PowerCube::Path;
     char formattedColor[8];
-    TOGoS::StringView rgbStr = hexEncodeRgb(formattedColor, CRGB(rOsc.next(), gOsc.next(), bOsc.next()));
+    TOGoS::StringView rgbStr = TOGoS::PowerCube::hexEncodeRgb(formattedColor, CRGB(rOsc.next(), gOsc.next(), bOsc.next()));
     kernel.deliverMessage(ComponentMessage(
       Path() << "fastleds" << "pixelcolors" << "unshift",
       rgbStr,

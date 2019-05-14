@@ -10,5 +10,6 @@
 #include "TOGoS/PowerCube/DigitalSwitch.cpp"
 #include "TOGoS/PowerCube/DHTReader.cpp"
 #include "TOGoS/PowerCube/FastLEDController.cpp"
+#include "TOGoS/PowerCube/PWMSwitch.cpp"
 #include "TOGoS/SSD1306/Controller.cpp"
 #include "TOGoS/SSD1306/Printer.cpp"

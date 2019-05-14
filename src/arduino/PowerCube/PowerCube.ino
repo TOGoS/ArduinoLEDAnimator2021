@@ -73,10 +73,10 @@ void setup() {
   kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
   kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
   kernel.components["dht7"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht7", D7, DHT22));
-  kernel.components["builtinled"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "builtinled", BUILTIN_LED, true));
+  kernel.components["builtinled"].reset(new TOGoS::PowerCube::PWMSwitch(&kernel, "builtinled", BUILTIN_LED, true));
   kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
   kernel.components["fastleds"].reset(new TOGoS::PowerCube::FastLEDController<WS2812B, D1, GRB>(&kernel, "fastleds", 11));
-  kernel.components["whiteledstrip"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "whiteledstrip", D4, false));
+  kernel.components["whiteledstrip"].reset(new TOGoS::PowerCube::PWMSwitch(&kernel, "whiteledstrip", D4, false));
 }
 
 int brightnessDirection = 1;
@@ -133,6 +133,8 @@ void loop() {
     ));
     lastColorPush = currentTime;
   }
+
+  delay(1);
 }
 
 int hiCount = 0;

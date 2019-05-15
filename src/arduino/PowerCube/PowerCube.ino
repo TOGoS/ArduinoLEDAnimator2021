@@ -8,6 +8,7 @@
 #include "TOGoS/PowerCube/FastLEDController.h"
 #include "TOGoS/PowerCube/Echoer.h"
 #include "TOGoS/PowerCube/Kernel.h"
+#include "TOGoS/PowerCube/PWMSwitch.h"
 #include "TOGoS/SSD1306/font8x8.h"
 #include "TOGoS/SSD1306/Controller.h"
 #include "TOGoS/SSD1306/Printer.h"
@@ -71,6 +72,8 @@ void setup() {
 
   kernel.components["serial-command-runner"].reset(new TOGoS::PowerCube::CommandRunner(&kernel, Serial));
   kernel.components["echoer"].reset(new TOGoS::PowerCube::Echoer(Serial));
+  // Disable these if you don't need them because the reads seem to mess with PWM timing
+  // enough that your lights will flicker.
   kernel.components["dht6"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht6", D6, DHT22));
   kernel.components["dht7"].reset(new TOGoS::PowerCube::DHTReader(&kernel, "dht7", D7, DHT22));
   kernel.components["builtinled"].reset(new TOGoS::PowerCube::PWMSwitch(&kernel, "builtinled", BUILTIN_LED, true));

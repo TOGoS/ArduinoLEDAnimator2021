@@ -2,6 +2,7 @@
 #include <DHT.h>
 #include <math.h>
 #include "DHTReader.h"
+#include "parseEnableMessage.h"
 #include "../BufferPrint.h"
 
 using Kernel = TOGoS::PowerCube::Kernel;
@@ -20,6 +21,7 @@ static bool isSame(float a, float b) {
 }
 
 void DHTReader::update() {
+  if( !this->enabled ) return;
   unsigned long currentTime = millis();
   if( this->lastReadTime == 0 || currentTime - this->lastReadTime > this->readInterval ) {
     char formatted[10];
@@ -44,5 +46,17 @@ void DHTReader::update() {
     }
 
     this->lastReadTime = currentTime;
+  }
+}
+
+
+void DHTReader::onMessage(const ComponentMessage& cm) {
+  bool enabled;
+  if( parseEnableMessage(cm, enabled) ) {
+    if( this->enabled != enabled ) {
+      this->enabled = enabled;
+      this->kernel->deliverMessage(ComponentMessage(Path() << this->name << "status", this->enabled?"enabled":"disabled", PubBits::All));
+      this->lastReadTime = 0;
+    }
   }
 }

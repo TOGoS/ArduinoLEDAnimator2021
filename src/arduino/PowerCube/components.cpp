@@ -13,3 +13,5 @@
 #include "TOGoS/PowerCube/PWMSwitch.cpp"
 #include "TOGoS/SSD1306/Controller.cpp"
 #include "TOGoS/SSD1306/Printer.cpp"
+#include "TOGoS/PowerCube/parseEnableMessage.cpp"
+#include "TOGoS/PowerCube/parseBoolean.cpp"

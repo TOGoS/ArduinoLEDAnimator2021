@@ -21,11 +21,13 @@ namespace TOGoS { namespace PowerCube {
     unsigned long prevHumidityReportTime = 0;
     float prevTemperature = NAN;
     unsigned long prevTemperatureReportTime = 0;
+    bool enabled = true;
   public:
     unsigned long readInterval = 1000;
     unsigned long maxReportInterval = 60000;
     DHTReader(KernelPtr kernel, const StringView& name, uint8_t pin, uint8_t type);
     virtual void update() override;
+    virtual void onMessage(const ComponentMessage &cm) override;
   };
 }}
 

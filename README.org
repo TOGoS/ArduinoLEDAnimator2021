@@ -47,6 +47,13 @@ so they can share code more easily or whatever, that would probably be fine.
 
 ** Software design
 
+*** Depended-on Arduino Libraries
+
+Core should not require anything.
+Components may have some requirements, though.
+
+- FastLED (for the FastLEDController component)
+
 *** Kernel
 
 Facilitiates communication between components.
@@ -63,32 +70,34 @@ usually for interfacing with hardware.
 
 Should have ability to exclude module classes at compile time.
 
-*** Path conventions
+*** MQTT conventions
+
+I'm changing these as I go.  This is a work in progress.
+Don't take it as gospel or anything.
 
 For MQTT, assume a device name path prefix.
 
 For OSC interfaces, shorter names for setters might make sense, e.g. ~somelight/state on~ instead of ~somelight/state/set on~.
 
-The device:
-- ~$device-name / status~ :: ~online~, ~disconnected~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
+Statuses:
+- ~disabled~ :: explicitly turned off
+- ~enabled~ :: enabled but no further state information known
+- ~online~ :: device seems to be working
+- ~offline~ :: i.e. 'disconnected', 'no signal'; 'disconnected' should be treated as a synonym for 'offline',
+  but I'm going to say let's prefer "offline" from now on because it's what [[https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/][this HiveMQ page]] uses as an example of
+  an LWT message and it's more symmetrical with "online"
 
-For things that can be enabled/disabled:
-- ~$component-name / state~ ::
-  - ~disabled~ :: explicitly turned off
-  - ~enabled~ :: enabled but no further state information known
-  - ... :: other states when enabled
+The device:
+- ~$device-name / status~ :: ~online~, ~offline~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
 
 Simple digital switches:
-- ~$component-name / state~ :: In addition to the possible ~enabled~, ~disabled~ (which don't indicate the switch state):
-  - ~on~
-  - ~off~
+- ~$component-name / state~ :: ~on~ or ~off~
 
 Variable-brightness lights:
-- ~$component-name / state~ :: similar to digital switch; when 'off', LED should be unpowered
+- ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
 - ~$component-name / brightness~ :: (0-1) brightness of light
 
 RGB[W] lights:
-- ~$component-name / state~ :: similar to digital switch; when 'off', LED should be unpowered
-- ~$component-name / brightness~ :: brightness (from 0-1) of the light, independent of color
+- ~$component-name / brightness~ :: (set only) multiply largest color component to be this brightness
 - ~$component-name / color~ :: color of the light
 

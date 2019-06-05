@@ -19,7 +19,9 @@ namespace TOGoS { namespace PowerCube {
   using KernelPtr = Kernel*;
 
   struct Path {
-    static const uint8_t maxPartCount = 3;
+    Path() = default;
+    Path(const StringView& parseMe);
+    static const uint8_t maxPartCount = 5;
     uint8_t length = 0;
     StringView parts[maxPartCount];
     Path &operator<<(const StringView& p) {
@@ -34,6 +36,12 @@ namespace TOGoS { namespace PowerCube {
     StringView& operator[](uint8_t index) { return this->parts[index]; }
   };
   Print &operator<<(Print& p, const Path& path);
+
+  struct PathWithOwnData : public Path {
+    std::unique_ptr<char[]> data;
+    PathWithOwnData() = default;
+    PathWithOwnData &operator=(const Path &path);
+  };
 
   namespace PubBits {
     enum {

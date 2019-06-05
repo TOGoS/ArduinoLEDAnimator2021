@@ -1,6 +1,9 @@
 #include "../BufferPrint.h"
 #include "Animator.h"
 
+// As of 2019-06-05 this is an experimental, untested work in progress.
+// Feel free to fix/rewrite/delete as appropriate.
+
 namespace TOGoS { namespace PowerCube {
   using WaveType = Animator::WaveType;
   using Channel = Animator::Channel;

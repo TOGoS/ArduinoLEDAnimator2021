@@ -3,7 +3,10 @@
 
 #include <Print.h>
 
-class BufferPrint : public Print {
+#include "StringView.h"
+
+namespace TOGoS {
+  class BufferPrint : public Print {
     char *buffer;
     const size_t bufferSize;
     size_t messageEnd = 0;
@@ -40,6 +43,7 @@ class BufferPrint : public Print {
     StringView str() const {
       return StringView(buffer, messageEnd);
     }
-};
+  };
+}
 
 #endif

@@ -72,6 +72,9 @@ Should have ability to exclude module classes at compile time.
 
 *** MQTT conventions
 
+See also:
+- https://www.reddit.com/r/MQTT/comments/8btsci/mqtt_topic_hierarchy_best_practise/
+
 I'm changing these as I go.  This is a work in progress.
 Don't take it as gospel or anything.
 
@@ -87,17 +90,41 @@ Statuses:
   but I'm going to say let's prefer "offline" from now on because it's what [[https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/][this HiveMQ page]] uses as an example of
   an LWT message and it's more symmetrical with "online"
 
-The device:
+Names on the left, unless specified as ~(target)~ are properties and can be read.
+To tell a component to set a property, append ~/set~ to the end of the path.
+~(target)~ paths are intended to receive methods directly, without ~/set~
+(in most cases the implied ~.../set~ would be the target).
+
+**** The device
 - ~$device-name / status~ :: ~online~, ~offline~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
 
-Simple digital switches:
+**** Simple digital switches
 - ~$component-name / state~ :: ~on~ or ~off~
 
-Variable-brightness lights:
+**** Variable-brightness lights
 - ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
 - ~$component-name / brightness~ :: (0-1) brightness of light
 
-RGB[W] lights:
-- ~$component-name / brightness~ :: (set only) multiply largest color component to be this brightness
+**** RGB[W] lights
+- ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
+- ~$component-name / brightness~ :: (set only) multiply largest color component to be this brightness; turn white if black
 - ~$component-name / color~ :: color of the light
+- ~$component-name / {red|green|blue|white} / brightness~ :: brightness
+     of red/green/blue channels (each channel can be treated as an
+     individual variable-brightness light)
 
+**** Individually-addressable RGB[W] LED strip
+- ~$component-name / pixelcolors~
+  - ~set~ (target) :: "#RRGGBB" set all colors at once
+  - ~unshift~ (target) :: "#RRGGBB" unshift a single color onto the first LED
+
+**** Light animator
+- ~$component-name~
+  - ~channels~
+    - ~$channel-number~
+      - ~targetpath~ :: path to which messages will be sent (including '/set' or '/unshift' or whatever)
+      - ~period~ :: period (in seconds) of animation cycle
+      - ~phase~ :: how far into the wav, in seconds
+      - ~minvalue~ :: minimum value
+      - ~maxvalue~ :: maximum value
+      - ~wavetype~ :: "triangle", "square", "flicker", "on", "off"

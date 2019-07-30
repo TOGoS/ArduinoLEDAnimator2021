@@ -33,6 +33,92 @@ TOGoS::SSD1306::Printer oledPrinter(oledController, font8x8);
 
 TOGoS::PowerCube::Kernel kernel;
 
+namespace TOGoS { namespace PowerCube {
+  class TriangleOscillator {
+    int current, delta, min, max;
+  public:
+    TriangleOscillator( int current, int delta, int min, int max )
+      : current(current), delta(delta), min(min), max(max) {}
+    int next() {
+      current += delta;
+      if( current > max ) { current = max + max - current; delta = -delta; }
+      if( current < min ) { current = min + min - current; delta = -delta; }
+      return current;
+    }
+  };
+    
+  /** Reads commands from a stream (e.g. Serial) nd forwards them */
+  class FastLEDAnimator : public Component {
+  private:
+    KernelPtr kernel;
+    Path unshiftPath;
+    Path fillPath;
+    unsigned long lastColorPush = 0;
+    
+    TriangleOscillator rOsc = TriangleOscillator(128, 13, 32, 255);
+    TriangleOscillator gOsc = TriangleOscillator(0, 19, 0, 255);
+    TriangleOscillator bOsc = TriangleOscillator(0, 23, 0, 255);
+    CRGB solidColor;
+    enum {
+      OSC, SOLID
+    } colorMode;
+  public:
+    FastLEDAnimator(KernelPtr kernel, const TOGoS::StringView& name) : kernel(kernel) {
+      this->unshiftPath << "fastleds" << "pixelcolors" << "unshift";
+      this->fillPath << "fastleds" << "pixelcolors" << "unshift";
+    }
+
+    CRGB nextColor() {
+      if( this->colorMode == OSC ) {
+        return CRGB(rOsc.next(), gOsc.next(), bOsc.next());
+      } else {
+        return this->solidColor;
+      }
+    }
+
+    virtual void update() override {
+      unsigned long currentTime = millis();
+      if( lastColorPush == 0 || currentTime - lastColorPush > 50 ) {
+        using ComponentMessage = TOGoS::PowerCube::ComponentMessage;
+        using Path = TOGoS::PowerCube::Path;
+        char formattedColor[8];
+        TOGoS::StringView rgbStr = TOGoS::PowerCube::hexEncodeRgb(formattedColor, this->nextColor());
+        this->kernel->deliverMessage(ComponentMessage(
+          this->unshiftPath,
+          rgbStr,
+          TOGoS::PowerCube::PubBits::Internal
+        ));
+        lastColorPush = currentTime;
+      }
+    }
+
+    void setColor(CRGB color) {
+      this->colorMode = SOLID;
+      this->solidColor = color;
+    }
+
+    virtual bool onMessage(const ComponentMessage& m) override {
+      if( m.path.length >= 2 && m.path[m.path.length-2] == "color" && m.path[m.path.length-1] == "set" ) {
+        if( m.payload == "on" ) {
+          this->setColor(CRGB(255,255,255));
+        } else if( m.payload == "off" ) {
+          this->setColor(CRGB(0,0,0));
+        } else if( m.payload == "animated" ) {
+          this->colorMode = OSC;
+        } else if( m.payload[0] == '#' ) {
+          CRGB color = parseRgb(m.payload);
+          this->setColor(color);
+        } else {        
+          this->kernel->getLogStream() << "# Unrecognized color: " << m.payload << "\n";
+        }
+      } else {
+        this->kernel->getLogStream() << "# Unrecognized message: " << m.path << "\n";
+        this->kernel->getLogStream() << "# Try .../color/set {on|off|animated|#RRGGBB}\n";
+      }
+    }
+  };
+}}
+
 void dumpPinList() {
   Serial << "# D1 = " << D1 << " (used by 2wire)\n";
   Serial << "# D2 = " << D2 << "\n";
@@ -44,6 +130,9 @@ void dumpPinList() {
   Serial << "# D8 = " << D8 << "\n";
   Serial << "# BUILTIN_LED = " << BUILTIN_LED << "\n";
 }
+
+int brightnessDirection = 1;
+uint8_t brightness = 128;
 
 void setup() {
   Serial.begin(115200);
@@ -80,29 +169,8 @@ void setup() {
   kernel.components["d5"].reset(new TOGoS::PowerCube::DigitalSwitch(&kernel, "d5", D5, false));
   kernel.components["fastleds"].reset(new TOGoS::PowerCube::FastLEDController<WS2812B, D1, GRB>(&kernel, "fastleds", 11));
   kernel.components["whiteledstrip"].reset(new TOGoS::PowerCube::PWMSwitch(&kernel, "whiteledstrip", D4, false));
+  kernel.components["fastledanimator"].reset(new TOGoS::PowerCube::FastLEDAnimator(&kernel, "fastledanimator"));
 }
-
-int brightnessDirection = 1;
-uint8_t brightness = 128;
-
-unsigned long lastColorPush = 0;
-
-class TriangleOscillator {
-  int current, delta, min, max;
-public:
-  TriangleOscillator( int current, int delta, int min, int max )
-    : current(current), delta(delta), min(min), max(max) {}
-  int next() {
-    current += delta;
-    if( current > max ) { current = max + max - current; delta = -delta; }
-    if( current < min ) { current = min + min - current; delta = -delta; }
-    return current;
-  }
-};
-
-TriangleOscillator rOsc(128, 13, 32, 255);
-TriangleOscillator gOsc(0, 19, 0, 255);
-TriangleOscillator bOsc(0, 23, 0, 255);
 
 void loop() {
   kernel.update();
@@ -123,19 +191,6 @@ void loop() {
   }
   */
 
-  unsigned long currentTime = millis();
-  if( lastColorPush == 0 || currentTime - lastColorPush > 50 ) {
-    using ComponentMessage = TOGoS::PowerCube::ComponentMessage;
-    using Path = TOGoS::PowerCube::Path;
-    char formattedColor[8];
-    TOGoS::StringView rgbStr = TOGoS::PowerCube::hexEncodeRgb(formattedColor, CRGB(rOsc.next(), gOsc.next(), bOsc.next()));
-    kernel.deliverMessage(ComponentMessage(
-      Path() << "fastleds" << "pixelcolors" << "unshift",
-      rgbStr,
-      TOGoS::PowerCube::PubBits::Internal
-    ));
-    lastColorPush = currentTime;
-  }
 
   delay(1);
 }

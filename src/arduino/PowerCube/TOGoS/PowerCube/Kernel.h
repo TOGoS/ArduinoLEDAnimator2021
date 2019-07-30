@@ -55,6 +55,7 @@ namespace TOGoS { namespace PowerCube {
   struct ComponentMessage {
     Path path;
     StringView payload;
+    // TODO: Add 'origin'?  Because e.g. only want to reply with 'help text' to Serial commands.
     uint8_t pubBits = 0;
     ComponentMessage() {}
     ComponentMessage(const Path &path, const StringView &p, uint8_t pubBits)

@@ -30,18 +30,25 @@ namespace TOGoS { namespace PowerCube {
       }
       colorData[0] = color;
     }
+    void setColor( CRGB color ) {
+      for( size_t i=colorData.size(); i-- > 0; ) {
+        colorData[i] = color;
+      }
+    }
     virtual void update() override {
       //this->controller.showLeds();   // Don't do this it makes you have seizures.
       //this->kernel->getLogStream() << "# FastLED.show()\n";
       FastLED.show(); // This actually only needs to be done once for all controllers
     }
     virtual void onMessage(const ComponentMessage& m) override {
-      if( m.path.length >= 2 && m.path[m.path.length-2] == "pixelcolors" && m.path[m.path.length-1] == "unshift" ) {
+      if( m.path.length >= 2 && m.path[m.path.length-2] == "pixelcolors" && m.path[m.path.length-1] == "set" ) {
+        CRGB color = parseRgb(m.payload);
+        this->setColor(color);
+      } else if( m.path.length >= 2 && m.path[m.path.length-2] == "pixelcolors" && m.path[m.path.length-1] == "unshift" ) {
         CRGB color = parseRgb(m.payload);
         // this->kernel->getLogStream() << "# " << this->name << "Unshifting color " << color << " lol\n";
         this->unshiftColor(color);
-      }
-      if( m.path.length >= 1 && m.path[m.path.length-1] == "debugloop" ) {
+      } else if( m.path.length >= 1 && m.path[m.path.length-1] == "debugloop" ) {
         this->debugLoop();
       }
     }

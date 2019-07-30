@@ -82,6 +82,10 @@ For MQTT, assume a device name path prefix.
 
 For OSC interfaces, shorter names for setters might make sense, e.g. ~somelight/state on~ instead of ~somelight/state/set on~.
 
+~state~ is ambiguous and I'm thinking that for things other than simple switches, it acts as a shortcut.
+e.g. for an animated thing, ~state/set~ might actually pause the thing at the given state,
+so that you can treat a potentially animated thing the same as you would a non-animated one for simple cases.
+
 Statuses:
 - ~disabled~ :: explicitly turned off
 - ~enabled~ :: enabled but no further state information known

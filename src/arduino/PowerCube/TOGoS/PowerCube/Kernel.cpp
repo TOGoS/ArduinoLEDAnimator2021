@@ -44,9 +44,12 @@ void Kernel::deliverMessage(const ComponentMessage &m) {
   if( (m.pubBits & PubBits::Serial) != 0 ) {
     this->getLogStream() << m.path << " " << m.payload << "\n";
   }
-  if( (m.pubBits & PubBits::Internal) != 0 &&
-      m.path.length >= 1 && this->components.count(m.path[0]) ) {
-    this->components[m.path[0]]->onMessage(m);
+  if( (m.pubBits & PubBits::Internal) != 0 ) {
+    if( m.path.length >= 1 && this->components.count(m.path[0]) ) {
+      this->components[m.path[0]]->onMessage(m);
+    } else {
+      this->getLogStream() << "# No such component: " << m.path[0] << "\n";
+    }
   }
 }
 void Kernel::update() {

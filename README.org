@@ -99,6 +99,14 @@ To tell a component to set a property, append ~/set~ to the end of the path.
 ~(target)~ paths are intended to receive methods directly, without ~/set~
 (in most cases the implied ~.../set~ would be the target).
 
+**** Additional commands available via serial
+
+- ~help~ or ~?~ - print out help text
+- ~ls~ - list components
+- ~...component.../help~ - print out help about a component
+- ~wifi/ssid/set~ - set SSID to connect to
+- ~wifi/password/set~ - set the WiFi password
+
 **** The device
 - ~$device-name / status~ :: ~online~, ~offline~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
 
@@ -112,7 +120,7 @@ To tell a component to set a property, append ~/set~ to the end of the path.
 **** RGB[W] lights
 - ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
 - ~$component-name / brightness~ :: (set only) multiply largest color component to be this brightness; turn white if black
-- ~$component-name / color~ :: color of the light
+- ~$component-name / color~ :: color code, probably "#RRGGBBWW" format
 - ~$component-name / {red|green|blue|white} / brightness~ :: brightness
      of red/green/blue channels (each channel can be treated as an
      individual variable-brightness light)

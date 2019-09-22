@@ -97,7 +97,7 @@ namespace TOGoS { namespace PowerCube {
       this->solidColor = color;
     }
 
-    virtual bool onMessage(const ComponentMessage& m) override {
+    virtual void onMessage(const ComponentMessage& m) override {
       if( m.path.length >= 2 && m.path[m.path.length-2] == "color" && m.path[m.path.length-1] == "set" ) {
         if( m.payload == "on" ) {
           this->setColor(CRGB(255,255,255));

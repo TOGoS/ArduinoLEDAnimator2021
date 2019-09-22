@@ -11,6 +11,7 @@
 
 // My libraries
 #include "../StringView.h"
+#include "Path.h"
 
 // TODO: Split this up
 
@@ -18,31 +19,9 @@ namespace TOGoS { namespace PowerCube {
   class Kernel;
   using KernelPtr = Kernel*;
 
-  struct Path {
-    Path() = default;
-    Path(const StringView& parseMe);
-    static const uint8_t maxPartCount = 5;
-    uint8_t length = 0;
-    StringView parts[maxPartCount];
-    Path &operator<<(const StringView& p) {
-      if( this->length < maxPartCount ) {
-	this->parts[this->length++] = p;
-      }
-      return *this;
-    }
-    const StringView *begin() const { return this->parts; }
-    const StringView *end() const { return this->parts + this->length; }
-    const StringView& operator[](uint8_t index) const { return this->parts[index]; }
-    StringView& operator[](uint8_t index) { return this->parts[index]; }
-  };
-  Print &operator<<(Print& p, const Path& path);
-
-  struct PathWithOwnData : public Path {
-    std::unique_ptr<char[]> data;
-    PathWithOwnData() = default;
-    PathWithOwnData &operator=(const Path &path);
-  };
-
+  // PubBits identify a class of agent,
+  // both for identifying where a message originated
+  // and for indicating where a message should be delivered
   namespace PubBits {
     enum {
       Internal = 1,
@@ -56,6 +35,7 @@ namespace TOGoS { namespace PowerCube {
     Path path;
     StringView payload;
     // TODO: Add 'origin'?  Because e.g. only want to reply with 'help text' to Serial commands.
+    // Where to deliver?
     uint8_t pubBits = 0;
     ComponentMessage() {}
     ComponentMessage(const Path &path, const StringView &p, uint8_t pubBits)

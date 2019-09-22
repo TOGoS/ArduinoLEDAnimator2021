@@ -2,9 +2,13 @@
 // files that aren't in the root sketch directory,
 // so we'll include them here.
 
+// Core stuff
 #include "TOGoS/PowerCube/Kernel.cpp"
+#include "TOGoS/PowerCube/Path.cpp"
+#include "TOGoS/PowerCube/PathWithOwnData.cpp"
 #include "TOGoS/stream_operators.cpp"
 
+// Components
 #include "TOGoS/PowerCube/CommandBuffer.cpp"
 #include "TOGoS/PowerCube/CommandRunner.cpp"
 #include "TOGoS/PowerCube/DigitalSwitch.cpp"

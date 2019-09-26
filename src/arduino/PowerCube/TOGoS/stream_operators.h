@@ -3,7 +3,9 @@
 
 class Print;
 class Printable;
-class TOGoS::StringView;
+namespace TOGoS {
+    class StringView;
+}
 
 Print & operator<<(Print &p, const TOGoS::StringView& sv);
 inline Print & operator<<(Print &p, char thing) { p.print(thing); return p; }

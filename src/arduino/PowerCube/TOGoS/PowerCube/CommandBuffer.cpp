@@ -20,7 +20,7 @@ CommandBuffer::BufferState CommandBuffer::onChar(char c) {
     // Clear it out!
     pos = 0;
   }
-  if( c == '\n' ) {
+  if( c == '\n' || c == '\r' ) {
     buffer[pos] = 0;
     return this->state = BufferState::READY;
   }

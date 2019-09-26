@@ -14,6 +14,7 @@ void CommandBuffer::reset() {
 bool CommandBuffer::addChar(char c) {
   if( pos >= bufferSize - 1 ) return false;
   buffer[pos++] = c;
+  return true;
 }
 CommandBuffer::BufferState CommandBuffer::onChar(char c) {
   if( this->state == BufferState::READY ) {

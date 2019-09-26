@@ -27,7 +27,8 @@ namespace TOGoS {
     size_t write(const uint8_t *stuff, size_t len) override {
       size_t maxLen = bufferSize - messageEnd;
       if( len > maxLen ) len = maxLen;
-      while( len-- > 0 ) buffer[messageEnd++] = *stuff++;
+      for( size_t i=len; i-- > 0; ) buffer[messageEnd++] = *stuff++;
+      return len;
     }
     
     virtual int availableForWrite() const {

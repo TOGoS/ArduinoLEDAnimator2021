@@ -14,3 +14,13 @@ Path::Path(const StringView& parseMe) {
     ++c;
   }
 }
+
+Path::Path(const char *parseMe) : Path(StringView(parseMe)) {}
+
+Print &TOGoS::PowerCube::operator<<(Print &p, const Path &path) {
+  for( size_t i=0; i<path.length; ++i ) {
+    if( i > 0 ) p << "/";
+    p << path[i];
+  }
+  return p;
+}

@@ -2,18 +2,20 @@
 #define _TOGOS_POWERCUBE_PATH_H
 
 #include <cstdint>
+#include <Print.h>
 #include "../StringView.h"
 
 namespace TOGoS { namespace PowerCube {
   struct Path {
     Path() = default;
     Path(const StringView& parseMe);
+    Path(const char *parseMe);
     static const uint8_t maxPartCount = 5;
     uint8_t length = 0;
     StringView parts[maxPartCount];
     Path &operator<<(const StringView& p) {
       if( this->length < maxPartCount ) {
-	this->parts[this->length++] = p;
+        this->parts[this->length++] = p;
       }
       return *this;
     }

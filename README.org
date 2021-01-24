@@ -45,3 +45,23 @@ and have the stuff be shared libraries.
 
 But I am thinking too much.
 Just try to make the lights work.
+
+*** What should the MQTT API look like?
+
+This stuff should be pretty standard.
+It seems like [[https://github.com/homieiot/convention/blob/develop/convention.md][homie]] keeps changing their ideas about 'online'/'disconnected'/etc,
+though I could be misremembering.
+
+#+BEGIN_EXAMPLE
+read ..devicename.../status online|offline
+write ..devicename.../solid1/state/set on   ; turn solid white LED strip on
+write ..devicename.../solid1/state/set off  ; turn solid white LED strip off
+write ..devicename.../anim1/state/set animating ; turn on the animated lights in animated mode
+write ..devicename.../anim1/state/set #rrggbb ; turn on the animated lights and set them to a specific static color
+write ..devicename.../anim1/state/set off   ; turn off the animated lights
+...various animation controls tb
+#+END_EXAMPLE
+
+The ...state/set topics might in the future be shorthand
+for changing more complex sets of variables,
+in which case there will be no single 'state' topics to read.

@@ -37,6 +37,16 @@ namespace TOGoS { namespace ArduinoLEDAnimator2021 {
       if( current < min ) { current = min + min - current; delta = -delta; }
       return current;
     }
+    void randomize() {
+      delta = random(1,24);
+      min = random(0,256);
+      max = random(0,256);
+      if( min > max ) {
+        min = min^max;
+        max = min^max;
+        min = min^max;
+      }
+    }
   };
 }}
 
@@ -46,34 +56,55 @@ TOGoS::ArduinoLEDAnimator2021::TriangleOscillator gOsc(0, 19, 0, 255);
 TOGoS::ArduinoLEDAnimator2021::TriangleOscillator bOsc(0, 23, 0, 255);
 TOGoS::ArduinoLEDAnimator2021::TriangleOscillator wOsc(0, 10, 0, 255);
 
-const unsigned long colorPushInterval = 50;
-unsigned long lastColorPush;
+unsigned long colorPushInterval = 50;
+unsigned long lastColorPush = 0;
+
+int newRandomSeed() {
+#ifdef RANDOM_REG32
+  return RANDOM_REG32;
+#else
+  return analogRead(A0);
+#endif
+}
 
 void setup() {
   Serial.begin(115200);
   pinMode(WHITE_PIN, OUTPUT);
-  lastColorPush = millis();
 
-  delay(500);
+  delay(200);
 
   Serial << "# Welcome to ArduinoLEDAnimator2021" << "\n";
   Serial << "\n";
   Serial << PinList();
   Serial << "\n";
+
+  delay(200);
+
+  int randomish = newRandomSeed();
+
+  Serial << "# Randomizing oscillators using " << randomish << "\n";
+  randomSeed(randomish);
+  rOsc.randomize();
+  gOsc.randomize();
+  bOsc.randomize();
+  wOsc.randomize();
+  colorPushInterval = random(1,100);
 }
 
 void loop() {
   unsigned long currentTime = millis();
   
   delay(10);
-
-  if( lastColorPush == 0 || currentTime - lastColorPush > colorPushInterval ) {
+  
+  bool colorsPushed = false;
+  
+  while( lastColorPush == 0 || currentTime - lastColorPush > colorPushInterval ) {
     fastLedController.unshiftColor(CRGB(rOsc.next(), gOsc.next(), bOsc.next()));
     lastColorPush += colorPushInterval;
-    FastLED.show();
-
-    digitalWrite(WHITE_PIN, wOsc.next() < 64 ? HIGH : LOW);
+    colorsPushed = true;
+    
+    digitalWrite(WHITE_PIN, wOsc.next() < 128 ? HIGH : LOW);
   }
-  
-  Serial << ".";
+
+  if( colorsPushed ) FastLED.show();
 }

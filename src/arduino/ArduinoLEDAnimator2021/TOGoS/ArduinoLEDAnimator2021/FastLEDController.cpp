@@ -1,6 +1,6 @@
 #include "FastLEDController.h"
 
-namespace TOGoS { namespace PowerCube {
+namespace TOGoS { namespace ArduinoLEDAnimator2021 {
 
 uint8_t parseHexDigit(char digit) {
   if( digit >= '0' && digit <= '9' ) return digit - '0';
@@ -37,4 +37,3 @@ Print &operator<<(Print &printer, const CRGB& rgb) {
 }
 
 }}
-

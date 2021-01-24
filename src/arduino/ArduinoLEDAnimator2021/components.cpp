@@ -4,3 +4,4 @@
 
 // Core stuff
 #include "TOGoS/stream_operators.cpp"
+#include "TOGoS/ArduinoLEDAnimator2021/FastLEDController.cpp"

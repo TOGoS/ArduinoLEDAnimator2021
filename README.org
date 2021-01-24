@@ -1,142 +1,47 @@
-#+TITLE: PowerCube
+#+TITLE: Arduino LED Animator 2021
 
-[2019-01-09]
+** Devlog [2021-01-24]
 
-The goal of this project is to create a framework for ESP8266-controlled
-battery and light controllers.
+I'm making this project to control the WSITEM-100149 ('18-inch fancy 2x4 lamp' made in 2019) and any future, similar light fixtures:
 
-If you want to basically throw all similar Arduino/ESP8266 projects in here
-so they can share code more easily or whatever, that would probably be fine.
+- A strip of individually-addressed LEDs (WS2812B?), which has some kind of animation going
+- A single-color LED light strip that can be turned on or off
 
-- Use it at home!
-- Take it on the road!
-- One kernel, multiple modules!
-- It's a WiFi hub!
-- Super flexible software; maybe do like the LED lamps w/ built-in WiFi network
-- How to connect to existing WiFi?
-  - For starters, standardize configuration over serial port
-  - If going the Forth route, will need to add [refcounted] strings!
-- https://iot.stackexchange.com/questions/651/how-can-i-easily-configure-wi-fi-on-a-smart-device-without-a-screen
-  - https://en.wikipedia.org/wiki/Wi-Fi_Protected_Setup
+Could get fancier (RGBW, more animation options), but for now I just want:
 
-*** Desired sofware features
+- To be able to control the lights via MQTT:
+  - Solid-color light states: off, on
+  - WS2812 strip states: off, solid color, animated
 
-- WiFi repeater
-  - Look into 
-- Reporting via MQTT or by serial
-- Display via I2C OLED screen
-- Dynamic configuration over WiFi
+Thinking 'solid color' could just be a special case of animated,
+depending how it's defined.
+Currently thinking parameters would just be numeric multipliers for:
+- Movement-across-strip speed
+- The speed of a set of oscillators
+- R, G, B multipliers for each oscillator to give the next value
 
-- Play around with https://github.com/martin-ger/esp_wifi_repeater for inspiration
-- Look into using ENC28J60 for connecting to ethernet
+Is it worth doing 'anti-aliasing'?  Whatever; for now I should just try to get the thing working basically.
 
-- Maybe have a ComputerSimulator in it, just to test out the idea
-  - Alternatively, just make a virtual OLED display - send vt-100 commands on the serial port
-  - Ideally do both: use ComputerSimulator internally to drive the [virtual] LED display
+Basing this project on PowerCube because I wrote some nice C++ classes for
+these Arduino projects in there, but I plan to remove most of it.
 
+This may turn into yet another unused project cluttering up my ~proj/~ folder.
+If there is no new devlog entry by 2022, it's probably safe to delete.
 
-*** Desired hardware features
+I haven't been able to find any documentation on WSITEM-100149 and attached boards.
+Is this thing even running PowerCube?  I'm not sure!
+But grepping for "FastLED" hasn't turned up anything else.
 
-- 3 power inputs that can be independently voltage-sampled and connected to Vbatt
-  - 12V power supply
-  - 12V external battery
-  - 12V internal battery
-  - 9V internal backup battery
-- A ~12V output port
-- OLED screen for showing status
+*** Should I use PlatformIO or Arduino?
 
-** Software design
+One reason I was making the 'PowerCube' project was that sharing libraries
+between projects when using Arduino IDE seemed difficult.
+They have to be installed globally.
+Haven't messed with PlatformIO enough to know if it's any better.
+But I keep rewriting things like WiFi and MQTT connection maintenance,
+command parsing, etc.
+Would be nice to have a template project that has my usual stuff in it,
+and have the stuff be shared libraries.
 
-*** Depended-on Arduino Libraries
-
-Core should not require anything.
-Components may have some requirements, though.
-
-- FastLED (for the FastLEDController component)
-
-*** Kernel
-
-Facilitiates communication between components.
-
-Components are named.
-
-Components communicate by sending messages through the kernel.
-Messages have a scope bit that indicates how far they go.
-
-*** Components
-
-Things that can be added at runtime;
-usually for interfacing with hardware.
-
-Should have ability to exclude module classes at compile time.
-
-*** MQTT conventions
-
-See also:
-- https://www.reddit.com/r/MQTT/comments/8btsci/mqtt_topic_hierarchy_best_practise/
-
-I'm changing these as I go.  This is a work in progress.
-Don't take it as gospel or anything.
-
-For MQTT, assume a device name path prefix.
-
-For OSC interfaces, shorter names for setters might make sense, e.g. ~somelight/state on~ instead of ~somelight/state/set on~.
-
-~state~ is ambiguous and I'm thinking that for things other than simple switches, it acts as a shortcut.
-e.g. for an animated thing, ~state/set~ might actually pause the thing at the given state,
-so that you can treat a potentially animated thing the same as you would a non-animated one for simple cases.
-
-Statuses:
-- ~disabled~ :: explicitly turned off
-- ~enabled~ :: enabled but no further state information known
-- ~online~ :: device seems to be working
-- ~offline~ :: i.e. 'disconnected', 'no signal'; 'disconnected' should be treated as a synonym for 'offline',
-  but I'm going to say let's prefer "offline" from now on because it's what [[https://www.hivemq.com/blog/mqtt-essentials-part-9-last-will-and-testament/][this HiveMQ page]] uses as an example of
-  an LWT message and it's more symmetrical with "online"
-
-Names on the left, unless specified as ~(target)~ are properties and can be read.
-To tell a component to set a property, append ~/set~ to the end of the path.
-~(target)~ paths are intended to receive methods directly, without ~/set~
-(in most cases the implied ~.../set~ would be the target).
-
-**** Additional commands available via serial
-
-- ~help~ or ~?~ - print out help text
-- ~ls~ - list components
-- ~...component.../help~ - print out help about a component
-- ~wifi/ssid/set~ - set SSID to connect to
-- ~wifi/password/set~ - set the WiFi password
-
-**** The device
-- ~$device-name / status~ :: ~online~, ~offline~ (vaguely inspired by https://homieiot.github.io/specification/#device-behavior)
-
-**** Simple digital switches
-- ~$component-name / state~ :: ~on~ or ~off~
-
-**** Variable-brightness lights
-- ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
-- ~$component-name / brightness~ :: (0-1) brightness of light
-
-**** RGB[W] lights
-- ~$component-name / state~ :: (set only) ~on~ or ~off~ as alias for brightness 0 to 1
-- ~$component-name / brightness~ :: (set only) multiply largest color component to be this brightness; turn white if black
-- ~$component-name / color~ :: color code, probably "#RRGGBBWW" format
-- ~$component-name / {red|green|blue|white} / brightness~ :: brightness
-     of red/green/blue channels (each channel can be treated as an
-     individual variable-brightness light)
-
-**** Individually-addressable RGB[W] LED strip
-- ~$component-name / pixelcolors~
-  - ~set~ (target) :: "#RRGGBB" set all colors at once
-  - ~unshift~ (target) :: "#RRGGBB" unshift a single color onto the first LED
-
-**** Light animator
-- ~$component-name~
-  - ~channels~
-    - ~$channel-number~
-      - ~targetpath~ :: path to which messages will be sent (including '/set' or '/unshift' or whatever)
-      - ~period~ :: period (in seconds) of animation cycle
-      - ~phase~ :: how far into the wav, in seconds
-      - ~minvalue~ :: minimum value
-      - ~maxvalue~ :: maximum value
-      - ~wavetype~ :: "triangle", "square", "flicker", "on", "off"
+But I am thinking too much.
+Just try to make the lights work.

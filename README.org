@@ -65,3 +65,14 @@ write ..devicename.../anim1/state/set off   ; turn off the animated lights
 The ...state/set topics might in the future be shorthand
 for changing more complex sets of variables,
 in which case there will be no single 'state' topics to read.
+
+** Devlog [2021-01-24T03:23]
+
+Ha ha!  By dumping that PowerCube baggage,
+This project is *already* more advanced!
+
+Oscillator parameters are reset on reboot.
+
+I don't necessarily want to stick with this oscillator model,
+and it would be cool to be able to control things remotely,
+but until then, this works, I guess.
